@@ -1,0 +1,35 @@
+version: '3.7'
+services:
+  ## Rust #########################################
+  rust:
+    build:
+      context: ./docker/rust
+    container_name: "actix-app-rust"
+    ports:
+      - "9200:9200"
+    environment:
+      USER: dev
+      CARGO_BUILD_TARGET_DIR: /app/target
+    volumes:
+      - ./:/app
+      - ./docker/.dock-data/rust/cargo-cache:/usr/local/cargo/registry
+      - ./docker/.dock-data/rust/target-cache:/app/target
+    tty: true
+
+  ### Database #########################################
+  database:
+    build:
+      context: ./docker/mysql
+    container_name: "actix-app-mysql"
+    environment:
+      - MYSQL_DATABASE=actix_app
+      - MYSQL_USER=dev
+      - MYSQL_PASSWORD=dec
+      - MYSQL_ROOT_PASSWORD=root
+      - TZ=Asia/Tokyo
+    volumes:
+      - ./docker/.dock-data/mysql:/var/lib/mysql
+      - ./docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./docker/logs/mysql:/var/log/mysql
+    ports:
+      - "3306:3306"
